@@ -1,4 +1,5 @@
 export default interface Result {
+  [x: string]: any;
   name: string;
   size: string;
   dateUpload: string;

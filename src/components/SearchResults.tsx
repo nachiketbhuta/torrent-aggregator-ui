@@ -1,9 +1,10 @@
 import { FC, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import Result from "../types/Result";
 
 const SearchResults: FC = () => {
   const { state } = useLocation();
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<Result[]>([]);
 
   useEffect(() => {
     retrieveTorrents();
@@ -15,10 +16,18 @@ const SearchResults: FC = () => {
       const response = await fetch(
         `https://torrent-search-engine-beta.vercel.app?query=${encodeURIComponent(
           searchInput
-        )}`
+        )}`,
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
       );
       const data = await response.json();
-      console.log(data);
+      const results = data.data.filter(
+        (result: Result) => result.magnet !== ""
+      );
+      setResults(results);
     } catch (error) {
     } finally {
     }
@@ -26,24 +35,25 @@ const SearchResults: FC = () => {
 
   return (
     <div>
-      <h1>Horizontal Card List</h1>
+      <h1>Search Results</h1>
       <div className="card-container">
-        <div className="card">
-          <img src="https://via.placeholder.com/150" alt="" />
-          <h2>Card Title 1</h2>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-            gravida odio eu rutrum malesuada.
-          </p>
-        </div>
-        <div className="card">
-          <img src="https://via.placeholder.com/150" alt="" />
-          <h2>Card Title 2</h2>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla
-            gravida odio eu rutrum malesuada.
-          </p>
-        </div>
+        {results.map((result) => (
+          <div className="card">
+            <h2>{result.name}</h2>
+            <p>Size : {result.size}</p>
+            <p>Seeders : {Number(result.seeders)}</p>
+            <p>Leechers : {Number(result.leechers)}</p>
+            <p>Date Upload : {result.dateUpload}</p>
+            <p>Uploaded By : {result.uploadedBy}</p>
+            <p>Category : {result.category}</p>
+            <p>
+              <a href={result.url}>Torrent Link</a>
+            </p>
+            <p>
+              <a href={result.magnet}>Magnet Link</a>
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );
